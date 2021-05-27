@@ -172,3 +172,34 @@ mod_coef <- mtcars %>%
 # 2. Determine the type of each column in nycflights13::flights.
 # 3. Compute the number of unique values in each column of iris.
 # 4. Generate 10 random normals from distributions with means of -10, 0, 10, and 100.
+
+map_dbl(mtcars,mean)
+mtcars %>% map_dbl(mean)
+mytib <- mtcars %>% map_dfc(mean, na.rm = T)
+myvec <- colMeans(mtcars)
+
+map_chr(nycflights13::flights, typeof)
+nycflights13::flights %>% map_chr(typeof)
+# Also if you want to look for the class, return a list with map
+nycflights13::flights %>% map(class)
+nycflights13::flights %>% map_chr(class)
+# sapply(nycflights13::flights, class)
+
+iris %>% map(n_distinct)
+iris %>% map_df(n_distinct)
+iris %>% map_int(n_distinct)
+# sapply(iris, n_distinct)
+# sapply(iris, function(x) length(unique(x)))
+
+means <- c(-10,0,10,100)
+means %>% map(rnorm, n = 10)
+
+inputVec <- c(-10, 0, 10, 100)
+inputVec %>%
+  map(~ rnorm(10, mean = inputVec))
+inputVec %>%
+  map(~ rnorm(10, mean = .))
+inputVec %>%
+  map(function(x) {rnorm(10, mean = x)})
+inputVec %>% map_dfc(rnorm, n = 10)
+
