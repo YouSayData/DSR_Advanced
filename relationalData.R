@@ -13,7 +13,9 @@ library(nycflights13)
 # nycflights13 has more than just the flights data:
 
 flights
+flights$carrier
 airlines
+
 airports
 planes
 weather
@@ -37,6 +39,10 @@ weather %>%
   count(year, month, day, hour, origin) %>% 
   filter(n > 1)
 
+weather %>% mutate(id = row_number(),
+                   id = str_c ("weather_", formatC(id, width = 5, flag = "0"))) %>%
+  select(id)
+
 # Sometimes you need a surrogate key
 
 
@@ -50,8 +56,17 @@ weather %>%
 # Exercise I ---------------------------------------------------------------
 
 # 1. Add a surrogate key to flights.
+
+flights %>% mutate(id = row_number(),
+                   id = str_c ("flights_", formatC(id, width = 6, flag = "0"))) %>%
+  select(id, everything())
+
 # 2. Is there a primary key in the diamonds dataset? If so, which is it?
 
+# there is none
+diamonds %>%
+  count(carat,cut,color,clarity,depth,table, price, x, y, z) %>% 
+  filter(n > 1)
 
 # II. Mutating Joins ------------------------------------------------------
 
@@ -143,7 +158,6 @@ y <- tribble(
 )
 left_join(x, y, by = "key")
 
-
 # Implicit and explicit keys ----------------------------------------------
 
 flights2 %>% 
@@ -167,6 +181,50 @@ flights2 %>%
 # 1. Add the location of the origin and destination (i.e. the lat and lon) to flights2 (don't save the result though).
 # 2. Find out: Is there a relationship between the age of a plane and its delays?
 
+flights2 %>% left_join(airports, c("origin" = "faa")) %>% 
+  rename("origin_lat" = "lat", "origin_lon" = "lon") %>%
+  left_join(airports, c("dest" = "faa")) %>% 
+  rename("dest_lat" = "lat", "dest_lon" = "lon")
+
+flights2 %>%
+  left_join(
+    airports %>% select(origin = faa, 
+           origin_lat = lat, 
+           origin_lon = lon)) %>%
+  left_join(
+    select(airports, 
+           dest = faa, 
+           dest_lat = lat, 
+           dest_lon = lon))
+
+flights2 %>% 
+  left_join(airports, by = c("dest" = "faa")) %>%
+  left_join(airports, by = c("origin" = "faa"), 
+            suffix = c("_dest", "_origin"))
+
+
+flights %>% 
+  left_join(planes, by = "tailnum") %>% 
+  mutate(age=year.x-year.y) %>%
+  group_by(age) %>%
+  summarise(avg_delay = mean(arr_delay, na.rm = T), count = n()) %>%
+  filter(count > 10) %>%
+  ggplot(aes(age, avg_delay, fill = count)) + geom_col()
+
+planes_year <- planes %>% 
+  select(tailnum, plane_age = year) 
+
+flights %>%
+  left_join(planes_year, by = "tailnum") %>%
+  ggplot(aes(plane_age,dep_delay), alpha = .1) +
+  geom_point()
+
+flights %>% 
+  left_join(planes, by = "tailnum", suffix = c("", "_plane")) %>% 
+  mutate(plane_age = year - year_plane) %>% 
+  drop_na %>% 
+  ggplot(aes(plane_age, dep_delay)) + 
+  geom_smooth()
 
 # Filtering Joins ---------------------------------------------------------
 
@@ -199,6 +257,62 @@ flights %>%
 # 1. What does it mean for a flight to have a missing tailnum? What do the tail numbers that don’t have a matching record in planes have in common? (Hint: one variable explains ~90% of the problems.)
 # 2. Filter flights to only show flights with planes that have flown at least 100 flights.
 # 3. Find the 48 hours (over the course of the whole year) that have the worst delays. Cross-reference it with the weather data. Can you see any patterns?
+
+flights %>%
+  anti_join(planes, by = "tailnum") %>% 
+  map_int(n_distinct)
+
+flights %>% filter(is.na(tailnum)) %>% map_int(n_distinct)
+
+flights %>%
+  anti_join(planes, by = "tailnum") %>%
+  count(tailnum, sort = T)
+
+flights %>%
+  map_int(n_distinct)
+
+notail <- flights %>% filter(is.na(tailnum)) %>% select(tailnum, everything())
+view(notail)
+
+flights %>% 
+  filter(is.na(tailnum)) %>% 
+  count(dep_delay)
+
+
+flights %>%
+  count(carrier, sort = TRUE) %>%
+  mutate(perc = n / sum(n)) %>%
+  arrange(desc(perc)) %>%
+  left_join(airlines)
+
+flights %>%
+  filter(is.na(tailnum)) %>% 
+  anti_join(planes, by = "tailnum") %>%
+  count(carrier, sort = TRUE) %>%
+  mutate(perc = n / sum(n)) %>%
+  arrange(desc(perc)) %>%
+  left_join(airlines)
+
+
+top_planes <- flights %>%
+  count(tailnum, sort = TRUE) %>%
+  filter(n >= 100)
+
+flights %>% semi_join(top_planes)
+
+
+
+
+planes_gte100 <- flights %>%
+  filter(!is.na(tailnum)) %>%
+  group_by(tailnum) %>%
+  count() %>%
+  filter(n >= 100)
+  
+flights %>%
+  semi_join(planes_gte100, by = "tailnum")
+
+
 
 # Recipe for working with relational data
 # Data is often not cleaned!
