@@ -54,3 +54,17 @@ m <- lm(Y ~ group + X, data = d)
 
 summary(m)
 anova(m)
+
+
+# Different order produces different anova --------------------------------
+
+anova(lm(Y ~ group + X, data = d))
+anova(lm(Y ~ X + group, data = d))
+
+
+# Sequence of models ------------------------------------------------------
+
+m0 <- lm(Y ~ 1, data = d)
+m1 <- lm(Y ~ group, data = d)
+
+anova(m0, m1, m)
