@@ -45,6 +45,39 @@ output
 # 3. Compute the number of unique values in each column of iris.
 # 4. Generate 10 random normals from distributions with means of -10, 0, 10, and 100.
 
+inputVec <- c(-10,0,10,100)
+output <- vector("list", length(inputVec))  # 1. output
+for (i in seq_along(inputVec)) {            # 2. sequence
+  output[[i]] <- rnorm(10, mean = inputVec[[i]])     # 3. body
+}
+output
+
+output <- vector("double", ncol(mtcars))  # 1. output
+for (i in seq_along(mtcars)) {            # 2. sequence
+  output[[i]] <- mean(mtcars[[i]])      # 3. body
+}
+output
+
+output <- vector("character", ncol(nycflights13::flights))  # 1. output
+for (i in seq_along(nycflights13::flights)) {            # 2. sequence
+  output[[i]] <- typeof(nycflights13::flights[[i]])      # 3. body
+}
+output
+
+output <- vector("integer", ncol(iris))  # 1. output
+for (i in seq_along(iris)) {            # 2. sequence
+  output[[i]] <- unique(iris[[i]]) %>% length      # 3. body
+}
+output
+
+inputVec <- c(-10,0,10,100)
+output <- vector("list", length(inputVec))  # 1. output
+for (i in seq_along(inputVec)) {            # 2. sequence
+  output[[i]] <- rnorm(10, mean = inputVec[[i]])      # 3. body
+}
+output
+
+
 
 # Modifying an existing object with a for loop ----------------------------
 
@@ -115,8 +148,6 @@ df$a[2] <- NA
 df
 df %>% map_dbl(mean)
 map_dbl(df, mean, na.rm = T)
-
-
 
 # Shortcuts ---------------------------------------------------------------
 

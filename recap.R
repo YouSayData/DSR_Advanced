@@ -16,6 +16,60 @@ library(tidyverse)
 # 5. Create a tibble in which all salinity ("sal") readings greater than 1 are divided by 100. 
 # (This is needed because some people wrote percentages as numbers from 0.0 to 1.0, but others wrote them as 0.0 to 100.0.)
 
+measurements %>% filter(!is.na(visitor), !is.na(reading))
+cleaned <- measurements %>% drop_na
+na.omit(measurements)
+measurements %>% filter(
+  across(.fns = ~ !is.na(.x))
+)
+
+test <- tibble(a = 1:10, b = 2:11)
+
+test %>% mutate(
+  across(.cols = starts_with("a"), .fns = ~ .x + .5)
+)
+
+test %>% mutate(
+  across(.fns = function(x) {x + .5})
+)
+
+myNormFunc <- function(x) {
+  result <- x + .5
+  result <- result / 2
+  return(result)
+}
+
+test %>% mutate(
+  across(.fns = myNormFunc)
+)
+
+cleaned %>% count(quantity)
+
+measurements %>%
+  group_by(quantity) %>% 
+  summarise(min = min(reading, na.rm = T), max = max(reading, na.rm = T))
+
+# Sample Solution
+
+(measurements <- read_csv("https://education.rstudio.com/blog/2020/08/more-example-exams/measurements.csv"))
+
+(cleaned <- measurements %>% 
+  filter(across(everything(), ~ !is.na(.x))))
+
+cleaned %>% 
+  count(quantity)
+
+cleaned %>% 
+  group_by(quantity) %>%
+  summarise(max = max(reading), min = min(reading))
+
+cleaned %>%
+  mutate(reading = ifelse(quantity == "sal" & reading > 1, 
+                          reading / 100, 
+                          reading)
+         )
+
+
 
 # Recap Exercise II: Functions ---------------------------------------------
 
@@ -26,6 +80,56 @@ library(tidyverse)
 #
 # 3. Write another function called show_columns that takes a string and a tibble as input and returns a string that says something like, “table has columns name, name, name". 
 # For example, show_columns('person', person) should return the string "person has columns person_id, personal_name, family_name".
+
+person <- read_csv("https://education.rstudio.com/blog/2020/08/more-example-exams/person.csv")
+
+summarize_table <- function(title,table){
+  dimension <- dim(table)
+  str_c(title," has ",dimension[1]," rows and ",dimension[2], " columns")
+}
+
+show_columns <- function(title,table){
+  str_c(title,
+        " has the columns ", 
+        colnames(table) %>% str_c(collapse = ", "))
+}
+
+summarize_table("table", person)
+show_columns("table", person)
+
+
+
+
+
+
+# Sample Solution
+
+person <- read_csv("https://education.rstudio.com/blog/2020/08/more-example-exams/person.csv")
+
+summarize_table <- function(name = "tibble", tibble = NULL) {
+  if (!is_tibble(tibble)) {
+    warning("you can add all kinds of stuff here...")
+    stop(tibble, " not a tibble.")
+  }
+  if (!is.character(name)) {
+    stop(name, " not a string")
+  }
+  dimensions <- dim(tibble)
+  str_c(name, "has", dimensions[1], "rows and", dimensions[2], "columns", sep = " ")
+}
+
+show_columns <- function(name = "tibble", tibble = NULL) {
+  if (length(tibble) < 1) {
+    stop("ceebs, bro!")
+  }
+  if (!is_tibble(tibble)) {
+    stop(tibble, " not a tibble.")
+  }
+  if (!is.character(name)) {
+    stop(name, " not a string")
+  }
+  str_c(name, "has the columns", str_c(colnames(tibble), collapse = ', '), sep = " ")
+}
 
 
 # Recap Exercise III: Tidy Data ----------------------------------------
@@ -44,3 +148,34 @@ library(tidyverse)
 # 2.1 The function should replace all - and >95% values with NA. 
 # 2.2 The body of the function may contain one or more pipelines and may create temporary or intermediate variables, 
 # but may not contain any loops.
+
+importData <- function(x) {
+  read_csv(x, 
+           na = c("-", ">95%", "NA")) %>%
+    pivot_longer(-ISO3, "Year_kind", "value") %>%
+    separate (Year_kind,c("Year","kind")) %>%
+    mutate(Year = Year %>% as.integer,
+           value = str_replace(value, "%", "") %>% as.numeric,
+           value = value / 100) %>%
+    pivot_wider(names_from = kind, values_from = value)
+}
+
+importData("https://education.rstudio.com/blog/2020/02/instructor-certification-exams/infant_hiv.csv")
+
+
+
+
+
+
+
+
+
+importData <- function(x) {
+  read_csv(x, na = c("", "NA", "-", ">95%")) %>%
+    pivot_longer(-ISO3, names_to = "year_kind", values_to = "value") %>%
+    separate(year_kind, into = c("year", "type")) %>% 
+    mutate(value = str_replace(value, "%", "")) %>%
+    mutate(value = as.numeric(value) / 100) %>%
+    pivot_wider(names_from = type, values_from = value)
+} 
+  
