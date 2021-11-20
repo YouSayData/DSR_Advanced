@@ -67,7 +67,7 @@ now() %>% with_tz("CET")
 now() %>% force_tz("CET")
 
 
-# Create time from indivual components ------------------------------------
+# Create time from individual components ------------------------------------
 
 flights %>% 
   select(year, month, day, hour, minute) %>%
@@ -154,7 +154,7 @@ flights %>%
 
 # interesting human pattern
 
-# actual deptature time ~ mean delay
+# actual departure time ~ mean delay
 
 flights_dt %>% 
   mutate(minute = minute(dep_time)) %>% 
@@ -166,7 +166,7 @@ flights_dt %>%
   geom_line()
 
 
-# scheduled deptature time ~ mean delay
+# scheduled departure time ~ mean delay
 
 flights_dt %>% 
   mutate(minute = minute(sched_dep_time)) %>% 
@@ -255,8 +255,8 @@ flights_dt %>%
 flights_dt <- flights_dt %>% 
   mutate(
     overnight = arr_time < dep_time,
-    arr_time = arr_time + days(overnight * 1),
-    sched_arr_time = sched_arr_time + days(overnight * 1)
+    arr_time = arr_time + days(overnight),
+    sched_arr_time = sched_arr_time + days(overnight)
   )
 
 flights_dt %>% 
