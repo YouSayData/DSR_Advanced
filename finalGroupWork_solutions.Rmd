@@ -46,7 +46,7 @@ covid %>%
 Use `covid` to create a summary showing the number of confirmed reports per month in 2020.
 
 ```{r confirmed_monthly_2020}
-covid %>% mutate(month = month(reported_date, label = T)) %>% count(month)
+covid %>% filter(year(reported_date) == 2020 & classification == "CONFIRMED") %>%  mutate(month = month(reported_date, label = T)) %>% count(month)
 ```
 
 Construct a model showing how well the number of cases reported in one month predicts the number of cases reported in the next month.
@@ -59,7 +59,8 @@ covid %>% mutate(month = month(reported_date, label = T)) %>% count(month) %>% m
 Create a stacked bar chart with the age groups on the X axis showing the fraction of cases of each source. Facet the plot by gender:
 
 ```{r stacked_bar_faced}
-covid %>% count(age_group, gender) %>% ggplot(aes("", n, fill = age_group)) + geom_col() + facet_wrap(~gender)
+covid %>%
+  ggplot() + geom_bar(aes(age_group, fill = source)) + facet_wrap(~gender)
 ```
 
 
@@ -109,5 +110,12 @@ classification <- read_excel("classification.xlsx")
 Use this tibble and the `covid` tibble to create a new tibble with one column containing the age classification, one called `earliest_reported` showing the first date of a report for that age group, and one called `largest_delay` showing the largest difference (in days) between the episode date and the reported date within that age group.
 
 ```{r summarize_classified}
-covid %>% group_by(age_group) %>% select(age_group, episode_date, reported_date) %>% mutate(delay = (episode_date %--% reported_date) / days(1)) %>% summarise(largest_delay = max(delay), earliest_reported = min(reported_date)) %>% rename(age = age_group) %>% mutate(age = str_replace_all(age, "Years", "") %>% str_trim) %>% inner_join(classification)
+covid %>% 
+  group_by(age_group) %>% 
+  select(age_group, episode_date, reported_date) %>% 
+  mutate(delay = (episode_date %--% reported_date) / days(1)) %>%
+  summarise(largest_delay = max(delay), earliest_reported = min(reported_date)) %>% 
+  rename(age = age_group) %>% 
+  mutate(age = str_replace_all(age, "Years", "") %>% 
+           str_trim) %>% inner_join(classification)
 ```
