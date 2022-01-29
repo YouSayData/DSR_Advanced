@@ -18,73 +18,45 @@ The file `toronto-covid-2021-01-04.csv` contains reports of COVID-19 cases in To
 Load this file to create a tibble called `covid`.
 
 ```{r read_data}
-covid <- read_csv("toronto-covid-2021-01-04.csv")
 ```
 
 Convert the values in the `gender` column to lower case; replace all "unknown" gender entries with `NA`; and then convert the entire column to a factor.
 Do not overwrite `covid`, but instead display the result inline.
 
 ```{r unknown_as_na}
-covid %>%
-  mutate(gender = ifelse(gender == "UNKNOWN", NA, str_to_lower(gender)),
-         gender = as_factor(gender))
 ```
 
 Use `covid` to calculate the ratio of the number of patients who are currently hospitalized to the number of patients who have ever been hospitalized.
 
 ```{r hospitalized_ratio}
-covid %>% 
-  select(currently_hospitalized, ever_hospitalized) %>%
-  mutate(across(everything(),
-                ~ case_when(. == "No" ~ 0,
-                            . == "Yes" ~ 1))) %>%
-  summarise(across(everything(), sum)) %>%
-  mutate(ratio = currently_hospitalized / ever_hospitalized) %>% 
-  pull(ratio)
 ```
 
 Use `covid` to create a summary showing the number of confirmed reports per month in 2020.
 
 ```{r confirmed_monthly_2020}
-covid %>% mutate(month = month(reported_date, label = T)) %>% count(month)
 ```
 
 Construct a model showing how well the number of cases reported in one month predicts the number of cases reported in the next month.
 (You may find the `lag()` function useful.)
 
 ```{r correlation}
-covid %>% mutate(month = month(reported_date, label = T)) %>% count(month) %>% mutate(last_month = lag(n), this_month = n) %>% ggplot(aes(last_month, this_month)) + geom_smooth()
 ```
 
 Create a stacked bar chart with the age groups on the X axis showing the fraction of cases of each source. Facet the plot by gender:
 
 ```{r stacked_bar_faced}
-covid %>% count(age_group, gender) %>% ggplot(aes("", n, fill = age_group)) + geom_col() + facet_wrap(~gender)
 ```
 
 
 Count the number of days in 2020 in which the number of reported cases was higher than the number reported the day before.
 
 ```{r days_of_increase}
-covid %>% 
-  filter(year(reported_date) == 2020) %>% 
-  count(reported_date) %>% 
-  mutate(day_before = reported_date - days(1)) %>% 
-  inner_join(covid %>% 
-               filter(year(reported_date) == 2020) %>%
-               count(reported_date) %>% 
-               rename(day_before = reported_date, cases_before = n)) %>%
-  filter(n > cases_before) %>% 
-  nrow
 ```
 
 Create a new tibble called `history` showing the number of cases per month for each postal code prefix.
 You may display the month using its full name (e.g., "September") or as a number (e.g., "09").
 
 ```{r create_history}
-history <- covid %>% 
-  mutate(month = month(reported_date, label = T, abbr = F)) %>% 
-  count(postal_code_prefix, month)
 ```
 
 Rearrange the table you just created so that it has 13 columns: one called `postal_code_prefix` and one more for each month.
@@ -94,20 +66,15 @@ and missing values must be shown as 0 rather than NA.
 Again, you may display the month using its full name or as a number.
 
 ```{r rearrange_table}
-history %>% 
-  pivot_wider(names_from = month, values_from = n, values_fill = 0)
 ```
 
 The file `classification.xlsx` classifies age ranges into four groups.
 Read this file to create a tibble called `classification`.
 
 ```{r read_data_xlsx}
-library(readxl)
-classification <- read_excel("classification.xlsx")
 ```
 
 Use this tibble and the `covid` tibble to create a new tibble with one column containing the age classification, one called `earliest_reported` showing the first date of a report for that age group, and one called `largest_delay` showing the largest difference (in days) between the episode date and the reported date within that age group.
 
 ```{r summarize_classified}
-covid %>% group_by(age_group) %>% select(age_group, episode_date, reported_date) %>% mutate(delay = (episode_date %--% reported_date) / days(1)) %>% summarise(largest_delay = max(delay), earliest_reported = min(reported_date)) %>% rename(age = age_group) %>% mutate(age = str_replace_all(age, "Years", "") %>% str_trim) %>% inner_join(classification)
 ```
