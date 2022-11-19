@@ -113,7 +113,7 @@ p1 + p2 + geom_jitter(aes(gear, disp))
 
 patchwork <- p1 + p2
 patchwork[[1]] <- patchwork[[1]] + theme_minimal()
-patchwork[[2]] <- patchwork[[1]] + theme_clean()
+patchwork[[2]] <- patchwork[[2]] + theme_clean()
 patchwork
 
 # does this surprise you?
@@ -141,6 +141,10 @@ patchwork + plot_annotation(tag_levels = 'i')
 patchwork[[1]] <- patchwork[[1]] + plot_layout(tag_level = 'new')
 patchwork + plot_annotation(tag_levels = c('A', '1'))
 
+patchwork_2 <- (p1 / p2) | (p3 / p4) 
+patchwork_2[[2]] <- patchwork_2[[2]] + plot_layout(tag_level = 'new')
+patchwork_2 + plot_annotation(tag_levels = c('A', 'I'))
+
 # you can style the plot annotations different than the rest
 
 patchwork + plot_annotation(tag_levels = c('A', '1'), tag_prefix = 'Fig. ',
@@ -158,4 +162,9 @@ p1
 p3a
 p1 + cowplot::get_legend(p3a)
 
+p1 + inset_element(cowplot::get_legend(p3a), left = 0.8, bottom = 0.4, right = 1, top = 1)
 
+iris
+palmerpenguins::penguins
+mpg
+diamonds

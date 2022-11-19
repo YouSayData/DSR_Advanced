@@ -1,6 +1,7 @@
 library(tidyverse)
 library(pheatmap)
 library(philentropy)
+library(echarts4r)
 
 # mockup data -------------------------------------------------------------
 
@@ -19,7 +20,7 @@ pheatmap(data_matrix, cutree_rows = 4, cutree_cols = 3)
 
 # ggplot
 
-data_dist_tbl <- distance(data_matrix) %>% as_tibble
+data_dist_tbl <- distance(data_matrix, method = "cosine") %>% as_tibble
 
 colnames(data_dist_tbl) <- rownames(data_matrix)
 data_dist_tbl$id <- rownames(data_matrix)
@@ -30,4 +31,14 @@ data_dist_tbl <- data_dist_tbl %>%
 data_dist_tbl %>%
   ggplot() +
   geom_tile(aes(id, id2, fill = distance))
+
+
+# echarts4r ---------------------------------------------------------------
+
+data_dist_tbl %>%
+  e_charts(id) %>%
+  e_heatmap(id2, distance) %>%
+  e_visual_map(distance)
+  
+
 

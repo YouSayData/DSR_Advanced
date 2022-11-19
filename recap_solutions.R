@@ -19,6 +19,13 @@ cleaned %>%
   summarise(min = min(reading),
             max = max(reading))
 
+cleaned %>% 
+  group_by(quantity) %>%
+  summarise(across(reading, 
+                   .fns = list(min = min, max = max)
+                   )
+            )
+
 #5
 
 corrected1 <- cleaned %>%
@@ -65,7 +72,11 @@ import_data <- function(link = character()) {
          na = c("-", ">95%")) %>%
   pivot_longer(-ISO3, names_to = "type", values_to = "value") %>%
   separate(type, into = c("year", "type"), sep = " ", convert = T) %>%
-  pivot_wider(names_from = type, values_from = value)
+  pivot_wider(names_from = type, values_from = value) %>%
+  mutate(across(est:lo, 
+                ~str_replace_all(., "%", "") %>% as.numeric() / 100
+                )
+         )
 }
 
 import_data("https://education.rstudio.com/blog/2020/02/instructor-certification-exams/infant_hiv.csv")

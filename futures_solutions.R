@@ -3,7 +3,7 @@
 lotto <- function(week) tibble(week = week,
                                correct = sample(1:49, 6) %in% sample(1:49, 6) %>% sum) 
 
-k <- 100000
+k <- 100
 weeks_played <- 1:k
 lotto_results <- map(weeks_played, lotto)
 lotto_results <- bind_rows(lotto_results)

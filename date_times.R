@@ -117,6 +117,13 @@ d3 <- "06-Jun-2017"
 d4 <- c("August 19 (2015)", "July 1 (2015)")
 d5 <- "12/30/14" # Dec 30, 2014
 
+tibble(dates = c("August 19 (2015)", "1 July (2015)")) %>%
+mutate(date_1 = mdy(dates), date_2 = dmy(dates), 
+       date_3 = case_when(
+         is.na(date_1) ~ date_2,
+         !is.na(date_1) ~ date_1)
+) %>%
+  transmute(dates = date_3)
 
 # Individual components from datetime -------------------------------------
 
@@ -130,7 +137,7 @@ now() %>% month(label = T, abbr = F)
 now() %>% wday(label = T)
 
 flights_dt %>% 
-  mutate(wday = wday(dep_time, label = TRUE)) %>% 
+  mutate(wday = wday(dep_time, label = TRUE, week_start = 1)) %>% 
   ggplot(aes(x = wday)) +
   geom_bar()
 

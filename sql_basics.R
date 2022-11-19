@@ -45,7 +45,7 @@ flights_db %>% filter(dep_delay > 240)
 
 flights_db %>% 
   group_by(dest) %>%
-  summarise(delay = mean(dep_time))
+  summarise(delay = mean(dep_delay))
 
 # all the work is done on the db site and not the client side.
 # the client just looks at everything that needs doing and then will send one request
@@ -80,3 +80,6 @@ nrow(tailnum_delay_db)
 tail(tailnum_delay_db)
 
 closeAllConnections()
+# on.exit(
+# DBI::dbDisconnect(dbicon)
+# )

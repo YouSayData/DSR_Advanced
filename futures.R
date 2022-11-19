@@ -73,6 +73,7 @@ lotto_results %>%
 # Set a "plan" for how the code should run.
 Num_workers <- availableCores() - 1 
 plan(multisession, workers = Num_workers)
+plan(sequential)
 k <- 100000
 weeks_played_2 <- 1:k
 furrr_lotto_results <- future_map(weeks_played_2, lotto, 
