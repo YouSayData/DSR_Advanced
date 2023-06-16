@@ -1,5 +1,3 @@
-library(tidyverse)
-
 # Recap Exercise I: Cleaning --------------------------------------------------
 
 # 1. Read the file measurements.csv (https://education.rstudio.com/blog/2020/08/more-example-exams/measurements.csv)

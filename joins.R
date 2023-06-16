@@ -7,9 +7,6 @@
 # 2. Filtering joins
 # 3. Set operations
 
-library(tidyverse)
-library(nycflights13)
-
 # nycflights13 has more than just the flights data:
 
 flights

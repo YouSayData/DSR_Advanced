@@ -1,10 +1,3 @@
-library(tidyverse)
-library(ggthemes)
-library(scales)
-library(future)
-library(furrr)
-library(tictoc)
-
 # Exercise ----------------------------------------------------------------
 
 # 1. Write a map / loop that simulates 6 out of 49 lotto (without super ball).

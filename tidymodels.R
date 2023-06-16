@@ -1,5 +1,3 @@
-library(tidymodels)
-
 iris %>% as_tibble
 
 iris %>% ggplot() +

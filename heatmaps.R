@@ -1,6 +1,4 @@
 library(tidyverse)
-library(pheatmap)
-library(philentropy)
 
 # mockup data -------------------------------------------------------------
 

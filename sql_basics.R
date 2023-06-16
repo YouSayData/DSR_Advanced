@@ -1,6 +1,3 @@
-library(tidyverse)
-
-
 # connect to DB -----------------------------------------------------------
 
 con <- DBI::dbConnect(RSQLite::SQLite(), path = ":dbname:")

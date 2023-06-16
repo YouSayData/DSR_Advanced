@@ -1,8 +1,3 @@
-library(tidyverse)
-library(patchwork)
-library(ggthemes)
-
-
 # Patchwork ---------------------------------------------------------------
 
 # Basic example 

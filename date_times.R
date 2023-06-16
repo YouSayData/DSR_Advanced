@@ -1,4 +1,3 @@
-
 # Why is working with dates tricky? ---------------------------------------
 
 # 1. Does every year have 365 days?
@@ -8,10 +7,6 @@
 
 
 # Libraries ---------------------------------------------------------------
-
-library(tidyverse)
-library(lubridate)
-library(nycflights13)
 
 # Date data types
 

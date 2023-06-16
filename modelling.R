@@ -11,11 +11,6 @@
 
 # All models are wrong, but some are useful. George Box
 
-library(tidyverse)
-
-library(modelr)
-options(na.action = na.warn)
-
 ?sim1
 ggplot(sim1, aes(x, y)) + 
   geom_point()

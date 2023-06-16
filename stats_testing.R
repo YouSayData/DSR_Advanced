@@ -1,15 +1,3 @@
-# install.packages("rstatix")
-# install.packages("palmerpenguins")
-
-
-# Libraries needed --------------------------------------------------------
-
-
-library(tidyverse)
-library(rstatix)
-library(palmerpenguins)
-
-
 # Sample Correlation Testing ---------------------------------------------
 
 # select Adelie penguins

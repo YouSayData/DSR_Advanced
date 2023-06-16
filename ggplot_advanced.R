@@ -8,17 +8,6 @@
 # Relies heavily on 
 # https://cararthompson.github.io/rl-cambridge-beautifully-annotated/beautifully-annotated_RLadiesCam.html#/title-slide
 
-library(palmerpenguins)
-library(ggplot2)
-library(ggtext)
-library(dplyr)
-library(tidyr)
-library(forcats)
-library(stringr)
-library(monochromeR)
-library(scales)
-library(showtext)
-
 penguins |>
   drop_na(sex) |>
   ggplot(aes(species, fill = sex)) +
@@ -230,7 +219,7 @@ new_plot
 themed_plot
 
 
-# eye movment -------------------------------------------------------------
+# eye movement -------------------------------------------------------------
 
 finished_plot <- themed_plot +
   theme(strip.text = element_text(family = "Enriqueta",
@@ -252,10 +241,12 @@ finished_plot <- themed_plot +
                        family = "Spectral",
                        colour = "#FFFFFF"
                          ) +
-  scale_y_continuous(labels = kgs, breaks = c(1000, 3000, 5000)) +
-  scale_y_continuous(expand = c(0, 0.5))
+  scale_y_continuous(labels = kgs, breaks = c(1000, 3000, 5000), expand = c(0, 0.5))
   
 finished_plot
+
+
+
 
 first_plot
 new_plot

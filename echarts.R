@@ -1,6 +1,3 @@
-library(tidyverse)
-library(echarts4r)
-library(palmerpenguins)
 
 penguins
 
