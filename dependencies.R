@@ -4,7 +4,7 @@ library(palmerpenguins)
 library(nycflights13)
 library(modelr)
 
-# Data wranling and analysis----------------------------------------------
+# Data wrangling and analysis----------------------------------------------
 
 library(tidyverse)
 library(tidymodels)
@@ -16,6 +16,13 @@ library(RSQLite)
 library(DBI)
 library(philentropy)
 library(rstatix)
+library(skimr)
+library(xgboost)
+library(themis)
+library(ranger)
+library(randomForest)
+library(keras)
+library(tensorflow)
 
 # Plotting ----------------------------------------------------------------
 

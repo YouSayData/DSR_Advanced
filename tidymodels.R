@@ -1,27 +1,34 @@
-iris %>% as_tibble
+library(tidymodels)
+library(palmerpenguins)
+library(ranger)
+library(randomForest)
 
-iris %>% ggplot() +
-  geom_point(aes(Sepal.Length, Petal.Length, col = Species))
+penguins_sml <- penguins |>
+  select(3:6, species) |>
+  drop_na()
+
+penguins_sml |> ggplot() +
+  geom_point(aes(bill_length_mm, flipper_length_mm, col = species))
 
 
 # Preprocess --------------------------------------------------------------
 
 # Sampling ----------------------------------------------------------------
 
-iris_split <- initial_split(iris, prop = .6)
-iris_split
+penguins_split <- initial_split(penguins_sml, prop = .6)
+penguins_split
 
-iris_split %>%
-  training %>%
-  glimpse
+penguins_split |>
+  training() |>
+  glimpse()
 
-iris_split %>%
-  testing %>%
-  glimpse
+penguins_split |>
+  testing() |>
+  glimpse()
 
-iris_split %>%
-  testing %>%
-  class
+penguins_split |>
+  testing() |>
+  class()
 
 
 # Pre-Process interface ---------------------------------------------------
@@ -30,34 +37,34 @@ iris_split %>%
 # transformations in tidymodels start with step_ . There quite a few.
 # prep() executes them
 
-iris_recipe <- iris_split %>%
-  training %>%
+penguins_recipe <- penguins_split |>
+  training() |>
   # start recipe for model
-  recipe(Species ~.) %>%
+  recipe(species ~.) |>
   # removes variables that have large correlations with other variables
-  step_corr(all_predictors()) %>% 
+  step_corr(all_predictors()) |> 
   # numeric data is centered to a mean of 0
-  step_center(all_predictors(), -all_outcomes()) %>%
+  step_center(all_predictors(), -all_outcomes()) |>
   # numeric data is scaled to a sd of 1
-  step_scale(all_predictors(), -all_outcomes()) %>%
+  step_scale(all_predictors(), -all_outcomes()) |>
   # execute the transformations
-  prep
-  
+  prep()
+
 
 # transform the test data -------------------------------------------------
 
 # we bake the testing data with the recipe derived from the training data
-iris_testing <- iris_recipe %>%
-  bake(testing(iris_split)) 
+penguins_testing <- penguins_recipe |>
+  bake(testing(penguins_split)) 
 
-iris_testing
+penguins_testing
 
 # for the training data we don't need an extra preprocessing step,
 # because it has already been done during the recipe creation
 # we only need to extract aka juice it
 
-iris_training <- juice(iris_recipe)
-iris_training
+penguins_training <- juice(penguins_recipe)
+penguins_training
 
 
 # Model training ----------------------------------------------------------
@@ -66,46 +73,139 @@ iris_training
 # e.g. ranger and randomforest do similar things, but have differently named parameters
 # tidymodels give easy access to that
 
-iris_ranger <- rand_forest(trees = 100, mode = "classification") %>%
-  set_engine("ranger") %>%
-  fit(Species ~ ., data = iris_training)
+penguins_ranger <- rand_forest(trees = 100, mode = "classification") |>
+  set_engine("ranger") |>
+  fit(species ~ ., data = penguins_training)
 
-iris_rf <-  rand_forest(trees = 100, mode = "classification") %>%
-  set_engine("randomForest") %>%
-  fit(Species ~ ., data = iris_training)
+penguins_rf <-  rand_forest(trees = 100, mode = "classification") |>
+  set_engine("randomForest") |>
+  fit(species ~ ., data = penguins_training)
 
 
 # Predictions -------------------------------------------------------------
 
-predict(iris_ranger, iris_testing)
+predict(penguins_ranger, penguins_testing)
 
-iris_ranger %>%
-  predict(iris_testing) %>%
-  bind_cols(iris_testing)
+penguins_ranger |>
+  predict(penguins_testing) |>
+  bind_cols(penguins_testing)
 
 
 # Validations -------------------------------------------------------------
 
-iris_ranger %>%
-  predict(iris_testing) %>%
-  bind_cols(iris_testing) %>%
-  metrics(truth = Species, estimate = .pred_class)
+penguins_ranger |>
+  predict(penguins_testing) |>
+  bind_cols(penguins_testing) |>
+  metrics(truth = species, estimate = .pred_class)
 
-iris_rf %>%
-  predict(iris_testing) %>%
-  bind_cols(iris_testing) %>%
-  metrics(truth = Species, estimate = .pred_class)
+penguins_rf |>
+  predict(penguins_testing) |>
+  bind_cols(penguins_testing) |>
+  metrics(truth = species, estimate = .pred_class)
 
 
 # Probabilities -----------------------------------------------------------
 
-iris_ranger %>%
-  predict(iris_testing, type = "prob")
+penguins_ranger |>
+  predict(penguins_testing, type = "prob")
 
-iris_probs <- iris_ranger %>%
-  predict(iris_testing, type = "prob") %>%
-  bind_cols(iris_testing)
+penguis_probs <- penguins_ranger |>
+  predict(penguins_testing, type = "prob") |>
+  bind_cols(penguins_testing)
 
-iris_probs%>%
-  roc_curve(Species, .pred_setosa:.pred_virginica) %>%
+penguis_probs |>
+  roc_curve(species, .pred_Adelie:.pred_Gentoo) |>
   autoplot()
+
+
+# smote -------------------------------------------------------------------
+
+penguins_sml |> 
+  count(species)
+
+library(themis)
+
+penguins_recipe_smote <- penguins_split |>
+  training() |>
+  # start recipe for model
+  recipe(species ~.) |>
+  # oversample minority classes 
+  step_smote(species, skip = T) |>
+  # removes variables that have large correlations with other variables
+  step_corr(all_predictors()) |> 
+  # numeric data is centered to a mean of 0
+  step_center(all_predictors(), -all_outcomes()) |>
+  # numeric data is scaled to a sd of 1
+  step_scale(all_predictors(), -all_outcomes()) |>
+  # execute the transformations
+  prep()
+
+# transform the test data -------------------------------------------------
+
+# we bake the testing data with the recipe derived from the training data
+penguins_testing <- penguins_recipe_smote |>
+  bake(testing(penguins_split)) 
+
+penguins_testing |> count(species)
+
+# for the training data we don't need an extra preprocessing step,
+# because it has already been done during the recipe creation
+# we only need to extract aka juice it
+
+penguins_training <- juice(penguins_recipe_smote)
+penguins_training |> count(species)
+
+
+# Model training ----------------------------------------------------------
+
+penguins_rf_smote <-  rand_forest(trees = 100, mode = "classification") |>
+  set_engine("randomForest") |>
+  fit(species ~ ., data = penguins_training)
+
+penguins_rf_smote |>
+  predict(penguins_testing) |>
+  bind_cols(penguins_testing) |>
+  metrics(truth = species, estimate = .pred_class)
+
+penguins_rf |>
+  predict(penguins_testing) |>
+  bind_cols(penguins_testing) |>
+  metrics(truth = species, estimate = .pred_class)
+
+
+# mlp ---------------------------------------------------------------------
+
+penguins_mlp_fit <-
+  mlp(epochs = 150L, hidden_units = 20L, dropout = 0.1) |>
+  set_mode("classification") |> 
+  set_engine("keras") |>
+  fit(species ~ ., data = penguins_training)
+
+penguins_mlp_result <- penguins_testing |>
+  select(species) |>
+  bind_cols(
+    predict(penguins_mlp_fit, new_data = penguins_testing),
+    predict(penguins_mlp_fit, new_data = penguins_testing, type = "prob")
+  )
+penguins_mlp_result
+
+penguins_mlp_fit |>
+  predict(penguins_testing) |>
+  bind_cols(penguins_testing) |>
+  metrics(truth = species, estimate = .pred_class)
+
+
+# xg boost ----------------------------------------------------------------
+
+xg_spec <- boost_tree(tree_depth = 10, trees = 100) |> 
+  set_mode("classification") |> 
+  set_engine("xgboost")
+
+penguins_xg_fit <- xg_spec |> 
+  fit(species ~ ., data = penguins_training)
+penguins_xg_fit
+
+penguins_xg_fit |>
+  predict(penguins_testing) |>
+  bind_cols(penguins_testing) |>
+  metrics(truth = species, estimate = .pred_class)

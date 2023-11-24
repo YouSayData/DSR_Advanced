@@ -126,76 +126,14 @@ ggplot(sim1, aes(x, y)) +
 # y = a_1 + a_2 * x_1 + a_3 * x_2 + ... + a_n * x_(n - 1)
 ?lm
 # y ~ x is translated by lm to y = a_1 + a_2 * x
-im1_mod <- lm(y ~ x, data = sim1)
 sim1_mod <- lm(y ~ x, data = sim1)
 coef(sim1_mod)
 # lm is faster than optim but only works for linear models
 
-# EXERCISE
-# One downside of the linear model is that it is sensitive to unusual values because the distance incorporates a squared term. Fit a linear model to the simulated data below, and visualise the results. Rerun a few times to generate different simulated datasets. What do you notice about the model?
+# Exercise:
+# Have a look at:
+diamonds |> ggplot(aes(carat, price)) + geom_point()
+# carat seems to be a good predictor for price. fit a model!
+# hint: have also a look at 
+diamonds |> ggplot(aes(log(carat), log(price))) + geom_point()
 
-sim1a <- tibble(
-  x = rep(1:10, each = 3),
-  y = x * 1.5 + 6 + rt(length(x), df = 2)
-)
-
-
-
-
-
-# solution help
-sim1a_mod <- lm(y ~ x, data = sim1a)
-coef(sim1a_mod)
-ggplot(sim1a, aes(x, y)) + 
-  geom_point(size = 2, colour = "grey30") + 
-  geom_abline(intercept = coef(sim1a_mod)[1], slope = coef(sim1a_mod)[2])
-
-?runif
-?rt
-tibble(
-  x = seq(-5, 5, length.out = 100),
-  normal = dnorm(x),
-  student_t = dt(x, df = 2)
-) %>%
-  gather(distribution, density, -x) %>%
-  ggplot(aes(x = x, y = density, colour = distribution)) +
-  geom_line()
-
-sim1a_loess <- loess(y ~ x, data = sim1a)
-grid_loess <- sim1a %>%
-  add_predictions(sim1a_loess)
-
-ggplot(sim1a, aes(x, y)) + 
-  geom_point(size = 2, colour = "grey30") + 
-  geom_abline(intercept = coef(sim1a_mod)[1], slope = coef(sim1a_mod)[2], colour = "blue") +
-  geom_line(aes(x = x, y = pred), data = grid_loess, colour = "red")
-
-# Visualising models using predictions and residuals
-
-grid <- sim1 %>% 
-  data_grid(x) 
-grid
-
-grid <- grid %>% 
-  add_predictions(sim1_mod) 
-grid
-
-# more complex than abline, but more general!
-ggplot(sim1, aes(x)) +
-  geom_point(aes(y = y)) +
-  geom_line(aes(y = pred), data = grid, colour = "red", size = 1)
-
-sim1 <- sim1 %>% 
-  add_residuals(sim1_mod)
-sim1
-
-ggplot(sim1, aes(resid)) + 
-  geom_freqpoly(binwidth = 0.5)
-
-
-ggplot(sim1, aes(x, resid)) + 
-  geom_ref_line(h = 0) +
-  geom_point() 
-
-# EXERCISE
-# Instead of using lm() to fit a straight line, you can use loess() to fit a smooth curve. Repeat the process of model fitting, grid generation, predictions, and visualisation on sim1 using loess() instead of lm(). How does the result compare to geom_smooth()
