@@ -1,6 +1,10 @@
 # Mac
 .DS_Store
 
+#Map
+Germany_map
+gadm*
+
 # Project files
 
 *.Rproj
