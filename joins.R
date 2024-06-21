@@ -36,6 +36,7 @@ weather %>%
 
 # Sometimes you need a surrogate key
 
+weather |> mutate(id = row_number()) |> select(id, everything())
 
 # Question I -------------------------------------------------------------
 
@@ -60,13 +61,13 @@ weather %>%
 # you can do it like this:
 
 flights2 %>%
-  select(-origin, -dest) %>%          # just to make it fit on the screen
+  # select(-origin, -dest) %>%          # just to make it fit on the screen
   left_join(airlines, by = "carrier")
 
 # It's called a mutating join, since you also could have used mutate():
 
 flights2 %>%
-  select(-origin, -dest) %>% 
+  # select(-origin, -dest) %>% 
   mutate(name = airlines$name[match(carrier, airlines$carrier)])
 
 
@@ -109,7 +110,7 @@ x %>%
 
 # one table has duplicate keys
 x <- tribble(
-  ~key, ~val_x,
+  ~ykey, ~val_x,
   1, "x1",
   2, "x2",
   2, "x3",
@@ -162,8 +163,19 @@ flights2 %>%
 
 
 # 1. Add the location of the origin and destination (i.e. the lat and lon) to flights2 (don't save the result though).
+flights2 |> 
+  left_join(airports |> select(faa, lat, lon), by = c("origin" = "faa")) |> 
+  left_join(airports |> select(faa, lat, lon), by = c("dest" = "faa"), suffix = c("_orig", "_dest"))
+
+airports |> count(faa) |> filter(n > 1)
+flights2 |> count(faa) |> filter(n > 1)
 # 2. Find out: Is there a relationship between the age of a plane and its delays?
 
+flights2 |> 
+  left_join(planes, by = "tailnum")
+
+planes |> 
+  left_join(flights2, by = "tailnum")
 
 # Filtering Joins ---------------------------------------------------------
 
@@ -232,10 +244,10 @@ df2 <- tribble(
 )
 
 # Observations in both df1 and df2
-intersect(df1, df2)
+dplyr::intersect(df1, df2)
 
 # All unique observations
-union(df1, df2)
+dplyr::union(df1, df2)
 
 # Observations in df1 that are not in df2
-setdiff(df1, df2)
+dplyr::setdiff(df1, df2)

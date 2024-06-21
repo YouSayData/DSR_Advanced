@@ -36,10 +36,35 @@ output
 
 # Write loops for (Think about the output, sequence, and body before you start writing the loop.):
 # 1. Compute the mean of every column in mtcars.
+output <- vector("double", ncol(mtcars))  # 1. output
+for (i in seq_along(mtcars)) {            # 2. sequence
+  output[[i]] <- median(mtcars[[i]])      # 3. body
+}
+output
+
 # 2. Determine the type of each column in nycflights13::flights.
+output <- vector("character", ncol(flights))  # 1. output
+for (i in seq_along(flights)) {            # 2. sequence
+  output[[i]] <- typeof(flights[[i]])      # 3. body
+}
+output
+
 # 3. Compute the number of unique values in each column of iris.
+output <- vector("integer", ncol(iris))  # 1. output
+for (i in seq_along(iris)) {            # 2. sequence
+  output[[i]] <- n_distinct(iris[[i]])       # 3. body
+}
+output
+
 # 4. Generate 10 random normals from distributions with means of -10, 0, 10, and 100.
 
+means_i_want_to_use <- c(-10,0,10,100)
+
+output <- vector("list", length(means_i_want_to_use))  # 1. output
+for (i in seq_along(means_i_want_to_use)) {            # 2. sequence
+  output[[i]] <- rnorm(10, means_i_want_to_use[[i]])       # 3. body
+}
+output
 
 # Modifying an existing object with a for loop ----------------------------
 
@@ -93,8 +118,15 @@ str_c("You got 5 hits after playing for over",
 df <- newData()
 
 map_dbl(df, mean)
+output <- vector("double", ncol(df))  # 1. output
+for (i in seq_along(df)) {            # 2. sequence
+  output[[i]] <- mean(df[[i]])      # 3. body
+}
+output
+
 map_dbl(df, median)
 map_dbl(df, sd)
+map(df, rescale01) |> bind_cols()
 
 # Or in a pipe
 df %>% map_dbl(mean)
@@ -126,6 +158,15 @@ mod_coef <- mtcars %>%
 # Write code that uses one of the map functions to:
 
 # 1. Compute the mean of every column in mtcars.
+map_dbl(mtcars, mean)
+
 # 2. Determine the type of each column in nycflights13::flights.
+map_chr(flights, typeof)
+
 # 3. Compute the number of unique values in each column of iris.
+map_int(iris, n_distinct)
+map_int(iris, \(x) length(unique(x)))
+
 # 4. Generate 10 random normals from distributions with means of -10, 0, 10, and 100.
+map(c(-10,0,10,100), \(x) rnorm(n = 10, mean = x))
+

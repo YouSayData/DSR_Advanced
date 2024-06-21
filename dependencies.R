@@ -7,6 +7,7 @@ library(modelr)
 # Data wrangling and analysis----------------------------------------------
 
 library(tidyverse)
+library(duckplyr)
 library(tidymodels)
 library(torch)
 library(future)

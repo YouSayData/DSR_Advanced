@@ -48,8 +48,8 @@ ks <- function (x) { number_format(accuracy = 1,
                                    suffix = "k",
                                    big.mark = ",")(x) }
 
-lotto_results %>% 
-  count(correct) %>%
+lotto_results  |>  
+  count(correct)  |> 
   ggplot(aes(correct, n)) +
   geom_col() +
   scale_y_continuous(labels = ks) +
@@ -70,12 +70,12 @@ k <- 100000
 weeks_played_2 <- 1:k
 furrr_lotto_results <- future_map(weeks_played_2, lotto, 
                                   .options = furrr_options(seed = T))
-furrr_lotto_results <- bind_rows(furrr_lotto_results) %>%
+furrr_lotto_results <- bind_rows(furrr_lotto_results) |> 
   arrange(week)
 plan(sequential)
 
-furrr_lotto_results %>% 
-  count(correct) %>%
+furrr_lotto_results |>  
+  count(correct) |> 
   ggplot(aes(correct, n)) +
   geom_col() +
   scale_y_continuous(labels = ks) +
@@ -84,7 +84,9 @@ furrr_lotto_results %>%
   theme_clean() +
   theme(axis.title = element_blank())
 
-furrr_lotto_results %>% filter(correct == 5) %>% count
+furrr_lotto_results |> 
+  filter(correct == 5) |> 
+  count()
 
 # all mapping functions can be replaced with a future_ mapping function
 # if you run it in plan(sequential) they are basically the same
