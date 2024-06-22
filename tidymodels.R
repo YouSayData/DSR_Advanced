@@ -2,6 +2,7 @@ library(tidymodels)
 library(palmerpenguins)
 library(ranger)
 library(randomForest)
+library(keras3)
 
 penguins_sml <- penguins |>
   select(3:6, species) |>
@@ -175,8 +176,7 @@ penguins_rf |>
 
 # mlp ---------------------------------------------------------------------
 
-penguins_mlp_fit <-
-  mlp(epochs = 150L, hidden_units = 20L, dropout = 0.1) |>
+penguins_mlp_fit <- mlp(epochs = 150L, hidden_units = 20L, dropout = 0.1) |>
   set_mode("classification") |> 
   set_engine("keras") |>
   fit(species ~ ., data = penguins_training)
@@ -209,3 +209,110 @@ penguins_xg_fit |>
   predict(penguins_testing) |>
   bind_cols(penguins_testing) |>
   metrics(truth = species, estimate = .pred_class)
+
+
+# Imputation --------------------------------------------------------------
+
+# have a look at the penguins dataset
+library(skimr)
+skim(penguins)
+
+penguins |> filter(if_any(bill_length_mm:body_mass_g, is.na))
+
+penguins_imputable <- penguins |> 
+  filter(!if_all(bill_length_mm:body_mass_g, is.na))
+
+penguins_imputable |> 
+  filter(is.na(sex))
+
+# split into training and test data
+penguins_split <- initial_split(penguins_imputable, prop = .6)
+
+# using most common value -------------------------------------------------
+
+penguins_recipe_impute <- penguins_split |>
+  training() |>
+  # start recipe for model
+  recipe(species ~.) |>
+  # impute the factor
+  step_impute_mode(sex) |>
+  prep()
+
+penguins_split |>
+  training() |> 
+  ggplot() +
+  geom_bar(aes(sex))
+  
+penguins_split |>
+  training() |>
+  count(sex)
+
+penguins_recipe_impute |>
+  juice() |> 
+  ggplot() +
+  geom_bar(aes(sex))
+
+penguins_recipe_impute |>
+  juice() |> 
+  count(sex)
+
+# using knn ---------------------------------------------------------------
+
+penguins_recipe_impute <- penguins_split |>
+  training() |>
+  # start recipe for model
+  recipe(species ~.) |>
+  # impute the factor
+  step_impute_knn(sex) |>
+  prep()
+
+penguins_split |>
+  training() |> 
+  ggplot() +
+  geom_bar(aes(sex))
+
+penguins_split |>
+  training() |>
+  count(sex)
+
+penguins_recipe_impute |>
+  juice() |> 
+  ggplot() +
+  geom_bar(aes(sex))
+
+penguins_recipe_impute |>
+  juice() |> 
+  count(sex)
+
+
+# using trees -------------------------------------------------------------
+
+penguins_recipe_impute <- penguins_split |>
+  training() |>
+  # start recipe for model
+  recipe(species ~.) |>
+  # impute the factor
+  step_impute_bag(sex) |>
+  prep()
+
+penguins_split |>
+  training() |> 
+  ggplot() +
+  geom_bar(aes(sex))
+
+penguins_split |>
+  training() |> 
+  count(sex)
+
+penguins_recipe_impute |>
+  juice() |> 
+  ggplot() +
+  geom_bar(aes(sex))
+
+penguins_recipe_impute |>
+  juice() |>
+  count(sex) 
+  
+  
+  
+
