@@ -1,3 +1,5 @@
+library(rstatix)
+
 # Sample Correlation Testing ---------------------------------------------
 
 # select Adelie penguins

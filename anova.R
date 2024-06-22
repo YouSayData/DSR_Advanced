@@ -66,5 +66,6 @@ anova(lm(Y ~ X + group, data = d))
 
 m0 <- lm(Y ~ 1, data = d)
 m1 <- lm(Y ~ group, data = d)
+m2 <- lm(Y ~ group + X, data = d)
 
-anova(m0, m1, m)
+anova(m0, m1, m2)
